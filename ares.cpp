@@ -851,27 +851,23 @@ int rijndaelKeySetupDec(u32 rk[/*4*(Nr + 1)*/], const u8 cipherKey[], int keyBit
     return Nr;
 }
 
-void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr + 1)*/], const u8 salt[256], int Nr, u8 pt[16], u8 ct[16]) {
+void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], u32 rk2[/*4*(Nr + 1)*/], int Nr, u8 pt[16], u8 ct[16]) {
     u32 s0, s1, s2, s3, t0, t1, t2, t3;
 #ifndef FULL_UNROLL
     int r;
 #endif /* ?FULL_UNROLL */
-
-    for (int i = 0;i < 16;++i) {
-        pt[i] ^= salt[salt_index[i]] ^ salt[salt_index[i + 16]] ^ salt[salt_index[i + 32]] ^ salt[salt_index[i + 48]];
-    }
     /*
      * map byte array block to cipher state
      * and add initial round key:
      */
 
-    s0 = GETU32(pt) ^ rk[0];//^ salt[salt_index[index]];
+    s0 = GETU32(pt) ^ rk[0] ^rk2[0];//^ salt[salt_index[index]];
 
-    s1 = GETU32(pt + 4) ^ rk[1];//^ salt[salt_index[index]];
+    s1 = GETU32(pt + 4) ^ rk[1] ^ rk2[1];//^ salt[salt_index[index]];
 
-    s2 = GETU32(pt + 8) ^ rk[2];//^ salt[salt_index[index]];
+    s2 = GETU32(pt + 8) ^ rk[2] ^ rk2[2];//^ salt[salt_index[index]];
 
-    s3 = GETU32(pt + 12) ^ rk[3];//^ salt[salt_index[index]];
+    s3 = GETU32(pt + 12) ^ rk[3] ^ rk2[3];//^ salt[salt_index[index]];
  
 /* !FULL_UNROLL */
     /*
@@ -884,30 +880,31 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
             Te1[(s1 >> 16) & 0xff] ^
             Te2[(s2 >> 8) & 0xff] ^
             Te3[(s3) & 0xff] ^
-            rk[4];//^ salt[salt_index[index]];
+            rk[4] ^ rk2[4];
 
         t1 =
             Te0[(s1 >> 24)] ^
             Te1[(s2 >> 16) & 0xff] ^
             Te2[(s3 >> 8) & 0xff] ^
             Te3[(s0) & 0xff] ^
-            rk[5];//^ salt[salt_index[index]];
+            rk[5] ^ rk2[5];//^ salt[salt_index[index]];
  
         t2 =
             Te0[(s2 >> 24)] ^
             Te1[(s3 >> 16) & 0xff] ^
             Te2[(s0 >> 8) & 0xff] ^
             Te3[(s1) & 0xff] ^
-            rk[6];//^ salt[salt_index[index]];
+            rk[6] ^ rk2[6];//^ salt[salt_index[index]];
 
         t3 =
             Te0[(s3 >> 24)] ^
             Te1[(s0 >> 16) & 0xff] ^
             Te2[(s1 >> 8) & 0xff] ^
             Te3[(s2) & 0xff] ^
-            rk[7];//^ salt[salt_index[index]];
+            rk[7] ^ rk2[7];//^ salt[salt_index[index]];
  
         rk += 8;
+        rk2 += 8;
         if (--r <= 0) {
             break;
         }
@@ -917,7 +914,7 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
             Te1[(t1 >> 16) & 0xff] ^
             Te2[(t2 >> 8) & 0xff] ^
             Te3[(t3) & 0xff] ^
-            rk[0];//^ salt[salt_index[index]];
+            rk[0] ^ rk2[0];//^ salt[salt_index[index]];
 
 
         s1 =
@@ -925,7 +922,7 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
             Te1[(t2 >> 16) & 0xff] ^
             Te2[(t3 >> 8) & 0xff] ^
             Te3[(t0) & 0xff] ^
-            rk[1];//^ salt[salt_index[index]];
+            rk[1] ^ rk2[1];//^ salt[salt_index[index]];
 
 
         s2 =
@@ -933,7 +930,7 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
             Te1[(t3 >> 16) & 0xff] ^
             Te2[(t0 >> 8) & 0xff] ^
             Te3[(t1) & 0xff] ^
-            rk[2];//^ salt[salt_index[index]];
+            rk[2] ^ rk2[2];//^ salt[salt_index[index]];
 
  
         s3 =
@@ -941,7 +938,7 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
             Te1[(t0 >> 16) & 0xff] ^
             Te2[(t1 >> 8) & 0xff] ^
             Te3[(t2) & 0xff] ^
-            rk[3];//^ salt[salt_index[index]];
+            rk[3] ^ rk2[3];//^ salt[salt_index[index]];
 
  
     }
@@ -955,7 +952,7 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
         (Te4[(t1 >> 16) & 0xff] & 0x00ff0000) ^
         (Te4[(t2 >> 8) & 0xff] & 0x0000ff00) ^
         (Te4[(t3) & 0xff] & 0x000000ff) ^
-        rk[0];//^ salt[salt_index[index]];
+        rk[0] ^ rk2[0];//^ salt[salt_index[index]];
     PUTU32(ct, s0);
  
     s1 =
@@ -963,7 +960,7 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
         (Te4[(t2 >> 16) & 0xff] & 0x00ff0000) ^
         (Te4[(t3 >> 8) & 0xff] & 0x0000ff00) ^
         (Te4[(t0) & 0xff] & 0x000000ff) ^
-        rk[1];//^ salt[salt_index[index]];
+        rk[1] ^ rk2[1];//^ salt[salt_index[index]];
     PUTU32(ct + 4, s1);
 
     s2 =
@@ -971,7 +968,7 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
         (Te4[(t3 >> 16) & 0xff] & 0x00ff0000) ^
         (Te4[(t0 >> 8) & 0xff] & 0x0000ff00) ^
         (Te4[(t1) & 0xff] & 0x000000ff) ^
-        rk[2];//^ salt[salt_index[index]];
+        rk[2] ^ rk2[2];//^ salt[salt_index[index]];
     PUTU32(ct + 8, s2);
 
     s3 =
@@ -979,11 +976,11 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
         (Te4[(t0 >> 16) & 0xff] & 0x00ff0000) ^
         (Te4[(t1 >> 8) & 0xff] & 0x0000ff00) ^
         (Te4[(t2) & 0xff] & 0x000000ff) ^
-        rk[3];//^ salt[salt_index[index]];
+        rk[3] ^ rk2[3];//^ salt[salt_index[index]];
     PUTU32(ct + 12, s3);
 }
 
-void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const u8 salt[256], int Nr, u8 ct[16], u8 pt[16]) {
+void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], u32 rk2[/*4*(Nr + 1)*/], int Nr, u8 ct[16], u8 pt[16]) {
     u32 s0, s1, s2, s3, t0, t1, t2, t3;
 #ifndef FULL_UNROLL
     int r;
@@ -994,13 +991,13 @@ void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const 
      * and add initial round key:
      */
     
-    s0 = GETU32(ct) ^ rk[0];//^ salt[salt_index[index]];
+    s0 = GETU32(ct) ^ rk[0] ^ rk2[0];//^ salt[salt_index[index]];
   
-    s1 = GETU32(ct + 4) ^ rk[1];//^ salt[salt_index[index]];
+    s1 = GETU32(ct + 4) ^ rk[1] ^ rk2[1];//^ salt[salt_index[index]];
 
-    s2 = GETU32(ct + 8) ^ rk[2];//^ salt[salt_index[index]];
+    s2 = GETU32(ct + 8) ^ rk[2] ^ rk2[2];//^ salt[salt_index[index]];
 
-    s3 = GETU32(ct + 12) ^ rk[3];//^ salt[salt_index[index]];
+    s3 = GETU32(ct + 12) ^ rk[3] ^ rk2[3];//^ salt[salt_index[index]];
     /*
      * Nr - 1 full rounds:
      */
@@ -1012,30 +1009,31 @@ void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const 
             Td1[(s3 >> 16) & 0xff] ^
             Td2[(s2 >> 8) & 0xff] ^
             Td3[(s1) & 0xff] ^
-            rk[4];//^ salt[salt_index[index]];
+            rk[4] ^ rk2[4];//^ salt[salt_index[index]];
 
         t1 =
             Td0[(s1 >> 24)] ^
             Td1[(s0 >> 16) & 0xff] ^
             Td2[(s3 >> 8) & 0xff] ^
             Td3[(s2) & 0xff] ^
-            rk[5];//^ salt[salt_index[index]];
+            rk[5] ^ rk2[5];//^ salt[salt_index[index]];
 
         t2 =
             Td0[(s2 >> 24)] ^
             Td1[(s1 >> 16) & 0xff] ^
             Td2[(s0 >> 8) & 0xff] ^
             Td3[(s3) & 0xff] ^
-            rk[6];//^ salt[salt_index[index]];
+            rk[6] ^ rk2[6];//^ salt[salt_index[index]];
 
         t3 =
             Td0[(s3 >> 24)] ^
             Td1[(s2 >> 16) & 0xff] ^
             Td2[(s1 >> 8) & 0xff] ^
             Td3[(s0) & 0xff] ^
-            rk[7];//^ salt[salt_index[index]];
+            rk[7] ^ rk2[7];//^ salt[salt_index[index]];
 
         rk += 8;
+        rk2 += 8;
         if (--r == 0) {
             break;
         }
@@ -1045,28 +1043,28 @@ void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const 
             Td1[(t3 >> 16) & 0xff] ^
             Td2[(t2 >> 8) & 0xff] ^
             Td3[(t1) & 0xff] ^
-            rk[0];//^ salt[salt_index[index]];
+            rk[0] ^ rk2[0];//^ salt[salt_index[index]];
  
         s1 =
             Td0[(t1 >> 24)] ^
             Td1[(t0 >> 16) & 0xff] ^
             Td2[(t3 >> 8) & 0xff] ^
             Td3[(t2) & 0xff] ^
-            rk[1];//^ salt[salt_index[index]];
+            rk[1] ^ rk2[1];//^ salt[salt_index[index]];
 
         s2 =
             Td0[(t2 >> 24)] ^
             Td1[(t1 >> 16) & 0xff] ^
             Td2[(t0 >> 8) & 0xff] ^
             Td3[(t3) & 0xff] ^
-            rk[2];//^ salt[salt_index[index]];
+            rk[2] ^ rk2[2];//^ salt[salt_index[index]];
 
         s3 =
             Td0[(t3 >> 24)] ^
             Td1[(t2 >> 16) & 0xff] ^
             Td2[(t1 >> 8) & 0xff] ^
             Td3[(t0) & 0xff] ^
-            rk[3];//^ salt[salt_index[index]];
+            rk[3] ^ rk2[3];//^ salt[salt_index[index]];
     }
 
     /*
@@ -1079,7 +1077,7 @@ void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const 
         (Td4[(t3 >> 16) & 0xff] & 0x00ff0000) ^
         (Td4[(t2 >> 8) & 0xff] & 0x0000ff00) ^
         (Td4[(t1) & 0xff] & 0x000000ff) ^
-        rk[0];//^ salt[salt_index[index]];
+        rk[0] ^ rk2[0];//^ salt[salt_index[index]];
     PUTU32(pt, s0);
 
     s1 =
@@ -1087,7 +1085,7 @@ void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const 
         (Td4[(t0 >> 16) & 0xff] & 0x00ff0000) ^
         (Td4[(t3 >> 8) & 0xff] & 0x0000ff00) ^
         (Td4[(t2) & 0xff] & 0x000000ff) ^
-        rk[1];//^ salt[salt_index[index]];
+        rk[1] ^ rk2[1];//^ salt[salt_index[index]];
     PUTU32(pt + 4, s1);
 
     s2 =
@@ -1095,7 +1093,7 @@ void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const 
         (Td4[(t1 >> 16) & 0xff] & 0x00ff0000) ^
         (Td4[(t0 >> 8) & 0xff] & 0x0000ff00) ^
         (Td4[(t3) & 0xff] & 0x000000ff) ^
-        rk[2];//^ salt[salt_index[index]];
+        rk[2] ^ rk2[2];//^ salt[salt_index[index]];
     PUTU32(pt + 8, s2);
 
     s3 =
@@ -1103,12 +1101,8 @@ void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const 
         (Td4[(t2 >> 16) & 0xff] & 0x00ff0000) ^
         (Td4[(t1 >> 8) & 0xff] & 0x0000ff00) ^
         (Td4[(t0) & 0xff] & 0x000000ff) ^
-        rk[3];//^ salt[salt_index[index]];
+        rk[3] ^ rk2[3];//^ salt[salt_index[index]];
     PUTU32(pt + 12, s3);
-
-    for (int i = 0;i < 16;++i) {
-        pt[i] ^= salt[salt_index[i]] ^ salt[salt_index[i+16]] ^ salt[salt_index[i + 32]] ^ salt[salt_index[i + 48]];
-    }
 }
 
 #ifdef INTERMEDIATE_VALUE_KAT

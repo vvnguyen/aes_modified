@@ -37,8 +37,8 @@ typedef unsigned int	u32;
 
 int rijndaelKeySetupEnc(u32 rk[/*4*(Nr + 1)*/], const u8 cipherKey[], int keyBits);
 int rijndaelKeySetupDec(u32 rk[/*4*(Nr + 1)*/], const u8 cipherKey[], int keyBits);
-void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const u8 salt[256], int Nr, u8 pt[16], u8 ct[16]);
-void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const u8 salt[256], int Nr, u8 ct[16], u8 pt[16]);
+void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], u32 rk2[/*4*(Nr + 1)*/], int Nr, u8 pt[16], u8 ct[16]);
+void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], u32 rk2[/*4*(Nr + 1)*/], int Nr, u8 ct[16], u8 pt[16]);
 
 #ifdef INTERMEDIATE_VALUE_KAT
 void rijndaelEncryptRound(const u32 rk[/*4*(Nr + 1)*/], int Nr, u8 block[16], int rounds);
