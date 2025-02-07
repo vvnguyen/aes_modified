@@ -1,2 +1,3 @@
 AES with small modification called
 ARES - advanced randomised encryption system 
+It use two keys one 256 bit long same as AES and second key called salt_index 512bit long.
