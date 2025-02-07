@@ -864,15 +864,15 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
      * map byte array block to cipher state
      * and add initial round key:
      */
-    int index = 0;
+
     s0 = GETU32(pt) ^ rk[0];//^ salt[salt_index[index]];
-    ++index;
+
     s1 = GETU32(pt + 4) ^ rk[1];//^ salt[salt_index[index]];
-    ++index;
+
     s2 = GETU32(pt + 8) ^ rk[2];//^ salt[salt_index[index]];
-    ++index;
+
     s3 = GETU32(pt + 12) ^ rk[3];//^ salt[salt_index[index]];
-    ++index;
+ 
 /* !FULL_UNROLL */
     /*
      * Nr - 1 full rounds:
@@ -885,28 +885,28 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
             Te2[(s2 >> 8) & 0xff] ^
             Te3[(s3) & 0xff] ^
             rk[4];//^ salt[salt_index[index]];
-        ++index;
+
         t1 =
             Te0[(s1 >> 24)] ^
             Te1[(s2 >> 16) & 0xff] ^
             Te2[(s3 >> 8) & 0xff] ^
             Te3[(s0) & 0xff] ^
             rk[5];//^ salt[salt_index[index]];
-        ++index;
+ 
         t2 =
             Te0[(s2 >> 24)] ^
             Te1[(s3 >> 16) & 0xff] ^
             Te2[(s0 >> 8) & 0xff] ^
             Te3[(s1) & 0xff] ^
             rk[6];//^ salt[salt_index[index]];
-        ++index;
+
         t3 =
             Te0[(s3 >> 24)] ^
             Te1[(s0 >> 16) & 0xff] ^
             Te2[(s1 >> 8) & 0xff] ^
             Te3[(s2) & 0xff] ^
             rk[7];//^ salt[salt_index[index]];
-        ++index;
+ 
         rk += 8;
         if (--r <= 0) {
             break;
@@ -919,7 +919,7 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
             Te3[(t3) & 0xff] ^
             rk[0];//^ salt[salt_index[index]];
 
-        ++index;
+
         s1 =
             Te0[(t1 >> 24)] ^
             Te1[(t2 >> 16) & 0xff] ^
@@ -927,7 +927,7 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
             Te3[(t0) & 0xff] ^
             rk[1];//^ salt[salt_index[index]];
 
-        ++index;
+
         s2 =
             Te0[(t2 >> 24)] ^
             Te1[(t3 >> 16) & 0xff] ^
@@ -935,7 +935,7 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
             Te3[(t1) & 0xff] ^
             rk[2];//^ salt[salt_index[index]];
 
-        ++index;
+ 
         s3 =
             Te0[(t3 >> 24)] ^
             Te1[(t0 >> 16) & 0xff] ^
@@ -943,7 +943,7 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
             Te3[(t2) & 0xff] ^
             rk[3];//^ salt[salt_index[index]];
 
-        ++index;
+ 
     }
 
     /*
@@ -957,7 +957,7 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
         (Te4[(t3) & 0xff] & 0x000000ff) ^
         rk[0];//^ salt[salt_index[index]];
     PUTU32(ct, s0);
-    ++index;
+ 
     s1 =
         (Te4[(t1 >> 24)] & 0xff000000) ^
         (Te4[(t2 >> 16) & 0xff] & 0x00ff0000) ^
@@ -965,7 +965,7 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
         (Te4[(t0) & 0xff] & 0x000000ff) ^
         rk[1];//^ salt[salt_index[index]];
     PUTU32(ct + 4, s1);
-    ++index;
+
     s2 =
         (Te4[(t2 >> 24)] & 0xff000000) ^
         (Te4[(t3 >> 16) & 0xff] & 0x00ff0000) ^
@@ -973,7 +973,7 @@ void rijndaelEncrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[/*4*(Nr +
         (Te4[(t1) & 0xff] & 0x000000ff) ^
         rk[2];//^ salt[salt_index[index]];
     PUTU32(ct + 8, s2);
-    ++index;
+
     s3 =
         (Te4[(t3 >> 24)] & 0xff000000) ^
         (Te4[(t0 >> 16) & 0xff] & 0x00ff0000) ^
@@ -993,41 +993,41 @@ void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const 
      * map byte array block to cipher state
      * and add initial round key:
      */
-    int index = 0;
+    
     s0 = GETU32(ct) ^ rk[0];//^ salt[salt_index[index]];
-    ++index;
+  
     s1 = GETU32(ct + 4) ^ rk[1];//^ salt[salt_index[index]];
-    ++index;
+
     s2 = GETU32(ct + 8) ^ rk[2];//^ salt[salt_index[index]];
-    ++index;
+
     s3 = GETU32(ct + 12) ^ rk[3];//^ salt[salt_index[index]];
     /*
      * Nr - 1 full rounds:
      */
     r = Nr >> 1;
     for (;;) {
-        ++index;
+
         t0 =
             Td0[(s0 >> 24)] ^
             Td1[(s3 >> 16) & 0xff] ^
             Td2[(s2 >> 8) & 0xff] ^
             Td3[(s1) & 0xff] ^
             rk[4];//^ salt[salt_index[index]];
-        ++index;
+
         t1 =
             Td0[(s1 >> 24)] ^
             Td1[(s0 >> 16) & 0xff] ^
             Td2[(s3 >> 8) & 0xff] ^
             Td3[(s2) & 0xff] ^
             rk[5];//^ salt[salt_index[index]];
-        ++index;
+
         t2 =
             Td0[(s2 >> 24)] ^
             Td1[(s1 >> 16) & 0xff] ^
             Td2[(s0 >> 8) & 0xff] ^
             Td3[(s3) & 0xff] ^
             rk[6];//^ salt[salt_index[index]];
-        ++index;
+
         t3 =
             Td0[(s3 >> 24)] ^
             Td1[(s2 >> 16) & 0xff] ^
@@ -1039,28 +1039,28 @@ void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const 
         if (--r == 0) {
             break;
         }
-        ++index;
+
         s0 =
             Td0[(t0 >> 24)] ^
             Td1[(t3 >> 16) & 0xff] ^
             Td2[(t2 >> 8) & 0xff] ^
             Td3[(t1) & 0xff] ^
             rk[0];//^ salt[salt_index[index]];
-        ++index;
+ 
         s1 =
             Td0[(t1 >> 24)] ^
             Td1[(t0 >> 16) & 0xff] ^
             Td2[(t3 >> 8) & 0xff] ^
             Td3[(t2) & 0xff] ^
             rk[1];//^ salt[salt_index[index]];
-        ++index;
+
         s2 =
             Td0[(t2 >> 24)] ^
             Td1[(t1 >> 16) & 0xff] ^
             Td2[(t0 >> 8) & 0xff] ^
             Td3[(t3) & 0xff] ^
             rk[2];//^ salt[salt_index[index]];
-        ++index;
+
         s3 =
             Td0[(t3 >> 24)] ^
             Td1[(t2 >> 16) & 0xff] ^
@@ -1073,7 +1073,7 @@ void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const 
      * apply last round and
      * map cipher state to byte array block:
      */
-    ++index;
+
     s0 =
         (Td4[(t0 >> 24)] & 0xff000000) ^
         (Td4[(t3 >> 16) & 0xff] & 0x00ff0000) ^
@@ -1081,7 +1081,7 @@ void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const 
         (Td4[(t1) & 0xff] & 0x000000ff) ^
         rk[0];//^ salt[salt_index[index]];
     PUTU32(pt, s0);
-    ++index;
+
     s1 =
         (Td4[(t1 >> 24)] & 0xff000000) ^
         (Td4[(t0 >> 16) & 0xff] & 0x00ff0000) ^
@@ -1089,7 +1089,7 @@ void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const 
         (Td4[(t2) & 0xff] & 0x000000ff) ^
         rk[1];//^ salt[salt_index[index]];
     PUTU32(pt + 4, s1);
-    ++index;
+
     s2 =
         (Td4[(t2 >> 24)] & 0xff000000) ^
         (Td4[(t1 >> 16) & 0xff] & 0x00ff0000) ^
@@ -1097,7 +1097,7 @@ void rijndaelDecrypt(const u32 rk[/*4*(Nr + 1)*/], const u8 salt_index[], const 
         (Td4[(t3) & 0xff] & 0x000000ff) ^
         rk[2];//^ salt[salt_index[index]];
     PUTU32(pt + 8, s2);
-    ++index;
+
     s3 =
         (Td4[(t3 >> 24)] & 0xff000000) ^
         (Td4[(t2 >> 16) & 0xff] & 0x00ff0000) ^
