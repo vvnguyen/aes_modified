@@ -1,4 +1,4 @@
 AES with small modification called
 ARES - advanced randomised encryption system 
-It use two keys one 256 bit long same as AES and second key called salt_index 512bit long.
+It use two keys one 256 bit long same as AES and second key called salt_index 256bit long.
 Base code for AES is reference code from official AES website.It use also 256 unsigned chars of salt that need to be appended to message.
